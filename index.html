@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Axio Capture</title>
+    <link rel="stylesheet" href="/src/editor/editor.css" />
+  </head>
+  <body>
+    <header id="toolbar">
+      <div class="group" id="tools">
+        <button data-tool="arrow" title="Arrow (A)">➚</button>
+        <button data-tool="line" title="Line (L)">╱</button>
+        <button data-tool="rect" title="Rectangle (R)">▭</button>
+        <button data-tool="ellipse" title="Ellipse (E)">◯</button>
+        <button data-tool="pen" title="Pen (P)">✎</button>
+        <button data-tool="highlight" title="Highlighter (H)">▮</button>
+        <button data-tool="text" title="Text (T)">T</button>
+        <button data-tool="step" title="Numbered step (N)">①</button>
+        <button data-tool="blur" title="Blur / pixelate (B)">▩</button>
+      </div>
+      <div class="group" id="colors">
+        <button class="swatch" data-color="#ff3b30" style="--c:#ff3b30" title="Red"></button>
+        <button class="swatch" data-color="#ff9500" style="--c:#ff9500" title="Orange"></button>
+        <button class="swatch" data-color="#ffcc00" style="--c:#ffcc00" title="Yellow"></button>
+        <button class="swatch" data-color="#34c759" style="--c:#34c759" title="Green"></button>
+        <button class="swatch" data-color="#0a84ff" style="--c:#0a84ff" title="Blue"></button>
+        <button class="swatch" data-color="#bf5af2" style="--c:#bf5af2" title="Purple"></button>
+        <button class="swatch" data-color="#ffffff" style="--c:#ffffff" title="White"></button>
+        <button class="swatch" data-color="#111111" style="--c:#111111" title="Black"></button>
+        <input type="color" id="custom-color" value="#ff3b30" title="Custom colour" />
+      </div>
+      <div class="group">
+        <label class="width" title="Stroke width">
+          <span>Width</span>
+          <input type="range" id="width" min="1" max="12" step="1" value="4" />
+        </label>
+      </div>
+      <div class="group">
+        <button id="undo" title="Undo (Ctrl/Cmd+Z)">↶</button>
+        <button id="redo" title="Redo (Ctrl/Cmd+Shift+Z)">↷</button>
+        <button id="clear" title="Remove all annotations">Clear</button>
+      </div>
+      <div class="group actions">
+        <button id="copy" class="primary" title="Copy to clipboard (Ctrl/Cmd+C)">Copy</button>
+        <button id="save" title="Save to captures folder (Ctrl/Cmd+S)">Save</button>
+        <button id="save-as" title="Save as… (Ctrl/Cmd+Shift+S)">Save as…</button>
+        <button id="new-capture" title="New capture">New</button>
+        <button id="open-settings" title="Settings">⚙</button>
+      </div>
+    </header>
+    <aside id="settings" hidden>
+      <form id="settings-form">
+        <h2>Settings</h2>
+        <label class="row">
+          <span>After a capture</span>
+          <select name="after_capture">
+            <option value="edit">Open the editor</option>
+            <option value="copy">Copy to clipboard</option>
+            <option value="save">Save to folder</option>
+            <option value="copy-save">Copy and save</option>
+          </select>
+        </label>
+        <label class="row check">
+          <input type="checkbox" name="close_on_copy" />
+          <span>Close the editor after copying</span>
+        </label>
+        <label class="row check">
+          <input type="checkbox" name="close_on_save" />
+          <span>Close the editor after saving</span>
+        </label>
+        <label class="row">
+          <span>Save folder</span>
+          <span class="inline">
+            <input type="text" name="save_dir" placeholder="" />
+            <button type="button" id="pick-dir">Choose…</button>
+            <button type="button" id="reset-dir" title="Use the default folder">Default</button>
+          </span>
+        </label>
+        <label class="row">
+          <span>File name pattern</span>
+          <input type="text" name="file_pattern" spellcheck="false" />
+        </label>
+        <p class="help" id="pattern-preview"></p>
+        <details class="help">
+          <summary>Tokens</summary>
+          <dl id="token-list"></dl>
+        </details>
+        <label class="row">
+          <span>Capture shortcut</span>
+          <input type="text" name="shortcut" spellcheck="false" />
+        </label>
+        <p class="help">
+          Modifiers <code>CmdOrCtrl</code>, <code>Ctrl</code>, <code>Alt</code>, <code>Shift</code>,
+          <code>Super</code>, joined with <code>+</code>, then a key: for example
+          <code>CmdOrCtrl+Shift+2</code> or <code>Alt+F9</code>.
+        </p>
+        <label class="row check">
+          <input type="checkbox" name="launch_at_login" />
+          <span>Launch at login</span>
+        </label>
+        <label class="row check">
+          <input type="checkbox" name="notify" />
+          <span>Notify when a capture is copied or saved without the editor</span>
+        </label>
+        <label class="row check">
+          <input type="checkbox" name="check_updates" />
+          <span>Check for updates automatically</span>
+        </label>
+        <label class="row check" id="dock-row">
+          <input type="checkbox" name="show_in_dock" />
+          <span>Show in the Dock (off makes it a menu-bar app)</span>
+        </label>
+        <p class="help">The last tool, colour and width you used are remembered automatically.</p>
+        <p class="help" id="settings-path"></p>
+        <p class="error" id="settings-error" hidden></p>
+        <div class="buttons">
+          <button type="submit" class="primary">Save</button>
+          <button type="button" id="settings-cancel">Cancel</button>
+        </div>
+      </form>
+    </aside>
+    <main id="stage">
+      <div id="empty">
+        <p>No capture yet.</p>
+        <p class="hint">Press <kbd id="shortcut">…</kbd> or use the tray icon to capture a region.</p>
+      </div>
+      <div id="canvas-wrap" hidden>
+        <canvas id="canvas"></canvas>
+        <textarea id="text-input" hidden rows="1" spellcheck="false"></textarea>
+      </div>
+    </main>
+    <footer id="status"><span id="status-text">Ready</span><span id="dimensions"></span></footer>
+    <script type="module" src="/src/editor/main.ts"></script>
+  </body>
+</html>

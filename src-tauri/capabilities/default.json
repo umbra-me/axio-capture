@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Editor and overlay windows: core IPC only. Shortcuts, dialogs, clipboard and files are driven from Rust.",
+  "windows": ["editor", "overlay-*"],
+  "permissions": ["core:default", "core:window:allow-close", "core:window:allow-set-focus"]
+}

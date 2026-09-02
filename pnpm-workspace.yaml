@@ -1,0 +1,3 @@
+# pnpm 10+ reads build-script approval from here, not package.json.
+allowBuilds:
+  esbuild: true
