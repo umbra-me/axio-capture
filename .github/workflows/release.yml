@@ -5,6 +5,8 @@ name: Release
 # Publishing the draft makes it live at releases/latest, which is the endpoint
 # the app polls. Requires the repository secrets TAURI_SIGNING_PRIVATE_KEY and
 # TAURI_SIGNING_PRIVATE_KEY_PASSWORD (empty if the key has none).
+# Linux builds on 24.04 because xcap's PipeWire bindings need libpipewire
+# newer than 22.04's 0.3.48.
 
 on:
   push:
@@ -24,7 +26,7 @@ jobs:
             args: --target aarch64-apple-darwin
           - platform: macos-latest
             args: --target x86_64-apple-darwin
-          - platform: ubuntu-22.04
+          - platform: ubuntu-24.04
             args: ""
           - platform: windows-latest
             args: ""
@@ -50,10 +52,10 @@ jobs:
           workspaces: src-tauri
 
       - name: Linux build dependencies
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-24.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf \
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf \
             libxcb1-dev libxcb-randr0-dev libxcb-shm0-dev libxrandr-dev libdbus-1-dev \
             libpipewire-0.3-dev clang
 

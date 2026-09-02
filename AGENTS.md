@@ -103,6 +103,10 @@ APPLE_SIGNING_IDENTITY="Apple Development: …" \
   move-to-Applications offer that keeps the updater pointed at one copy.
 - `.github/workflows/release.yml` builds and signs on a `v*` tag into a draft
   release with `latest.json`; the public repo gets Actions minutes for free.
+  Linux builds on `ubuntu-24.04`: xcap's PipeWire bindings do not compile
+  against 22.04's libpipewire 0.3.48. Plugin builder methods that exist on
+  one platform only (`macos_launcher`) must stay behind `cfg`, or the
+  Windows job fails to compile.
 
 ## Gotchas
 
