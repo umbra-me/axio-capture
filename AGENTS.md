@@ -110,6 +110,26 @@ APPLE_SIGNING_IDENTITY="Apple Development: …" \
   one platform only (`macos_launcher`) must stay behind `cfg`, or the
   Windows job fails to compile.
 
+## Verification
+
+Treat these as the truth about what has been proven, and move items up as
+they are exercised:
+
+- Proven on macOS (owner, Apple Silicon, 2026-09-02): capture, overlay
+  placement, permission recovery, editor tools, settings, real close,
+  menu-bar mode, signed local build, CI release for all platforms.
+- Compiles and packages only: Windows (NSIS, MSI) and Linux (deb, rpm,
+  AppImage). No runtime run on either. Wayland capture and hotkey are the
+  first things to check on Linux.
+- Never exercised: the updater's download-and-install path (needs a
+  `v0.1.1` release and an installed 0.1.0 to prove), launch at login,
+  notifications, the move-to-Applications offer, the settings panel's
+  interactions inside the real webview (layout and the file round-trip were
+  checked from a browser and from the written JSON).
+- Automated: 12 Rust tests (selection mapping, crop, settings defaults and
+  validation, file-name patterns and `%n%`), clippy, fmt, `tsc`, and the
+  release workflow on a `v*` tag.
+
 ## Gotchas
 
 - `tauri build` on macOS sometimes leaves the DMG's temporary image mounted

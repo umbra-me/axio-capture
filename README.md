@@ -9,6 +9,26 @@ itself updated. Window and full-screen capture, recording, uploaders and the
 agent-facing API (an MCP server, structured capture metadata, redaction) are
 later milestones, not missing pieces of this one.
 
+## Status
+
+0.1.0 is released for all three platforms, and this is what that claim rests
+on as of 2026-09-02:
+
+- **Verified on macOS**, by the owner on an Apple Silicon Mac: region capture
+  and overlay placement, the Screen Recording recovery flow, the editor and
+  its tools, settings persistence, real window close, and menu-bar mode. The
+  signed bundle keeps its permission grant across rebuilds.
+- **Built in CI, never run:** the Windows and Linux installers compile,
+  bundle and sign, but nobody has launched them yet. Linux on Wayland is the
+  least certain: capture goes through the desktop portal and the hotkey
+  depends on the compositor implementing the GlobalShortcuts portal.
+- **Wired, not exercised:** in-app updating (the feed is live, but nothing
+  older than 0.1.0 exists to update from; the first `v0.1.1` tag is the
+  test), launch at login, notifications, and the move-to-Applications offer.
+- **Known rough edges:** macOS bundles are signed but not notarised, so
+  another Mac needs right-click, Open on first launch; the local DMG step
+  occasionally fails on a stale mount (CI builds the DMGs).
+
 ## Use
 
 | Action | How |
