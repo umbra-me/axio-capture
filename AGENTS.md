@@ -104,7 +104,9 @@ APPLE_SIGNING_IDENTITY="Apple Development: …" \
 - `.github/workflows/release.yml` builds and signs on a `v*` tag into a draft
   release with `latest.json`; the public repo gets Actions minutes for free.
   Linux builds on `ubuntu-24.04`: xcap's PipeWire bindings do not compile
-  against 22.04's libpipewire 0.3.48. Plugin builder methods that exist on
+  against 22.04's libpipewire 0.3.48, and its Wayland path links `gbm`,
+  `drm` and `EGL`, so the apt line in the workflow is the authoritative
+  Linux dependency list. Plugin builder methods that exist on
   one platform only (`macos_launcher`) must stay behind `cfg`, or the
   Windows job fails to compile.
 

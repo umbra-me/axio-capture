@@ -114,7 +114,9 @@ Prerequisites: Rust 1.85+, Node 22+, pnpm, and the
 [Tauri platform dependencies](https://tauri.app/start/prerequisites/) for your
 OS (Xcode Command Line Tools on macOS; WebView2 and the MSVC toolchain on
 Windows; `webkit2gtk-4.1`, `libappindicator3`, `librsvg2` and `patchelf` on
-Debian-family Linux, plus `libxcb`, `libxrandr` and `libdbus-1` for capture).
+Debian-family Linux, plus `libxcb`, `libxrandr`, `libdbus-1`, `libpipewire-0.3`,
+`libgbm`, `libdrm` and `libegl1-mesa` development packages for capture; the
+release workflow has the exact `apt-get` line).
 
 ```bash
 pnpm install
