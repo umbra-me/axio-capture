@@ -23,7 +23,8 @@ text, numbered steps and blur (pixelate). Hold `Shift` to constrain a shape.
 Keys `A L R E P H T N B` pick tools; `Ctrl/⌘+Z` undoes; `Ctrl/⌘+C` copies the
 result to the clipboard; `Ctrl/⌘+S` saves a PNG named by the file-name
 pattern into the save folder; `Ctrl/⌘+Shift+S` picks a location. Closing the
-editor keeps your annotations; the next capture replaces them.
+editor discards its annotations; the capture itself stays until the next one,
+so **Open editor** in the tray brings it back clean.
 
 ## Settings
 
@@ -50,7 +51,10 @@ settings panel:
   autostart desktop entry on Linux.
 - **Notify** with a desktop notification when a capture is copied or saved
   without the editor.
-- **Show in the Dock** (macOS). Off turns it into a pure menu-bar app.
+- **Dock icon** (macOS): never (default), always, or only while the editor is
+  open. The default keeps Axio Capture a pure menu-bar app; the editor still
+  opens and takes focus. The while-open mode makes macOS treat each editor
+  session as a regular app launch and park a tile in the Dock's recents.
 
 The last tool, colour and stroke width are remembered automatically. Settings
 live in one JSON file in the platform config directory (on macOS
@@ -127,6 +131,7 @@ bundle from another Mac opens after a right-click, Open.
 ```
 src-tauri/src/      Rust: capture, overlay and editor windows, export, naming,
                     settings, hotkey, tray, CLI, updater, permission, install
+src-tauri/Info.plist  LSUIElement: a menu-bar app with no Dock icon
 src/overlay/        the selection overlay page
 src/editor/         the annotation editor and settings panel
 src/shared/ipc.ts   the typed command layer between the two sides

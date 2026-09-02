@@ -57,7 +57,7 @@ pub fn set_settings(
     }
     settings::save(&app, &settings).map_err(|e| format!("{e:#}"))?;
     if settings.launch_at_login != previous.launch_at_login
-        || settings.show_in_dock != previous.show_in_dock
+        || settings.dock_icon != previous.dock_icon
     {
         settings::apply_system(&app, &settings);
     }
@@ -259,7 +259,7 @@ pub async fn export_png(
         "copy" => {
             export::copy(&png).map_err(|e| format!("{e:#}"))?;
             if settings.close_on_copy {
-                let _ = window.hide();
+                let _ = window.close();
             }
             Ok(ExportResult { action, path: None })
         }
@@ -268,7 +268,7 @@ pub async fn export_png(
             let path = export::new_capture_path(&settings, width, height);
             export::save(&png, &path).map_err(|e| format!("{e:#}"))?;
             if settings.close_on_save {
-                let _ = window.hide();
+                let _ = window.close();
             }
             Ok(ExportResult {
                 action,
@@ -303,7 +303,7 @@ pub async fn export_png(
             let path = chosen.into_path().map_err(|e| e.to_string())?;
             export::save(&png, &path).map_err(|e| format!("{e:#}"))?;
             if settings.close_on_save {
-                let _ = window.hide();
+                let _ = window.close();
             }
             Ok(ExportResult {
                 action,

@@ -25,7 +25,7 @@ export interface Settings {
   shortcut: string;
   launch_at_login: boolean;
   notify: boolean;
-  show_in_dock: boolean;
+  dock_icon: "always" | "while-editor-open" | "never";
   check_updates: boolean;
   skip_move_prompt: boolean;
   editor: EditorPrefs;

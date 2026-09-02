@@ -21,6 +21,20 @@ pub enum AfterCapture {
     CopySave,
 }
 
+/// macOS only: when the Dock shows the app.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum DockIcon {
+    Always,
+    /// Only while the editor window exists. Every switch to a regular app
+    /// also lands the app in the Dock's recent-applications area, which is
+    /// why this is not the default.
+    WhileEditorOpen,
+    /// A pure menu-bar app; the editor still opens and takes focus.
+    #[default]
+    Never,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "snake_case")]
 pub struct EditorPrefs {
@@ -53,8 +67,8 @@ pub struct Settings {
     pub launch_at_login: bool,
     /// Desktop notification when a capture is copied or saved without the editor.
     pub notify: bool,
-    /// macOS only: show the Dock icon. Off makes it a pure menu-bar app.
-    pub show_in_dock: bool,
+    /// macOS only: when the Dock icon is shown.
+    pub dock_icon: DockIcon,
     /// Look for a new version after launch and every few hours.
     pub check_updates: bool,
     /// Set when the user declined the macOS "move to Applications" offer.
@@ -73,7 +87,7 @@ impl Default for Settings {
             shortcut: crate::CAPTURE_SHORTCUT.into(),
             launch_at_login: false,
             notify: true,
-            show_in_dock: true,
+            dock_icon: DockIcon::default(),
             check_updates: true,
             skip_move_prompt: false,
             editor: EditorPrefs::default(),
@@ -114,20 +128,47 @@ pub fn apply_system(app: &AppHandle, settings: &Settings) {
     }
 
     #[cfg(target_os = "macos")]
-    {
-        let policy = if settings.show_in_dock {
-            tauri::ActivationPolicy::Regular
-        } else {
-            tauri::ActivationPolicy::Accessory
-        };
-        let handle = app.clone();
-        let _ = app.run_on_main_thread(move || {
-            if let Err(error) = handle.set_activation_policy(policy) {
-                eprintln!("axio-capture: activation policy: {error}");
-            }
-        });
+    apply_dock_icon(app, settings.dock_icon);
+}
+
+/// The policy the app must start with. tao applies this in
+/// `applicationDidFinishLaunching`, after `setup` has run, so a runtime call
+/// from `setup` is overwritten; the initial value has to go through `App`.
+#[cfg(target_os = "macos")]
+pub fn initial_activation_policy(settings: &Settings) -> tauri::ActivationPolicy {
+    match settings.dock_icon {
+        DockIcon::Always => tauri::ActivationPolicy::Regular,
+        DockIcon::WhileEditorOpen | DockIcon::Never => tauri::ActivationPolicy::Accessory,
     }
 }
+
+/// Show or hide the Dock icon per the setting and whether the editor exists.
+/// Runs on the main thread; safe to call from anywhere.
+#[cfg(target_os = "macos")]
+pub fn apply_dock_icon(app: &AppHandle, mode: DockIcon) {
+    let editor_open = app
+        .get_webview_window(crate::overlay::EDITOR_LABEL)
+        .is_some();
+    let show = match mode {
+        DockIcon::Always => true,
+        DockIcon::WhileEditorOpen => editor_open,
+        DockIcon::Never => false,
+    };
+    let policy = if show {
+        tauri::ActivationPolicy::Regular
+    } else {
+        tauri::ActivationPolicy::Accessory
+    };
+    let handle = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        if let Err(error) = handle.set_activation_policy(policy) {
+            eprintln!("axio-capture: activation policy: {error}");
+        }
+    });
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn apply_dock_icon(_app: &AppHandle, _mode: DockIcon) {}
 
 pub fn path(app: &AppHandle) -> Result<PathBuf> {
     let dir = app

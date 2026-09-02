@@ -721,7 +721,7 @@ function openSettings(): void {
   field<HTMLInputElement>("shortcut").value = current.shortcut;
   field<HTMLInputElement>("launch_at_login").checked = current.launch_at_login;
   field<HTMLInputElement>("notify").checked = current.notify;
-  field<HTMLInputElement>("show_in_dock").checked = current.show_in_dock;
+  field<HTMLSelectElement>("dock_icon").value = current.dock_icon;
   field<HTMLInputElement>("check_updates").checked = current.check_updates;
   $("dock-row").hidden = !navigator.platform.toLowerCase().includes("mac");
   void updatePatternPreview();
@@ -744,7 +744,7 @@ function readForm(): Settings {
     shortcut: "CmdOrCtrl+Shift+2",
     launch_at_login: false,
     notify: true,
-    show_in_dock: true,
+    dock_icon: "never",
     check_updates: true,
     skip_move_prompt: false,
     editor: { tool, color, width: strokeWidth },
@@ -760,7 +760,7 @@ function readForm(): Settings {
     shortcut: field<HTMLInputElement>("shortcut").value.trim(),
     launch_at_login: field<HTMLInputElement>("launch_at_login").checked,
     notify: field<HTMLInputElement>("notify").checked,
-    show_in_dock: field<HTMLInputElement>("show_in_dock").checked,
+    dock_icon: field<HTMLSelectElement>("dock_icon").value as Settings["dock_icon"],
     check_updates: field<HTMLInputElement>("check_updates").checked,
     editor: { tool, color, width: strokeWidth },
   };

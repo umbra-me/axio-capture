@@ -50,7 +50,9 @@ APPLE_SIGNING_IDENTITY="Apple Development: …" \
   and revealed by `overlay_show` once the page has drawn, so nothing flashes),
   then `finish` tears them down. On macOS the overlay is raised to
   screen-saver level so it covers the menu bar and the Dock. `show_editor`
-  opens or reuses the single `editor` window; closing it hides it.
+  opens or reuses the single `editor` window; closing it destroys it (the
+  owner did not want a hidden window lingering), and only the capture
+  survives in `AppState`.
 - `commands.rs` is the IPC surface. Images cross the bridge as raw bytes
   (`tauri::ipc::Response`), never base64. `export_png` takes the editor's PNG
   as a raw request body and reads the action from the `x-axio-action` header;
@@ -70,6 +72,16 @@ APPLE_SIGNING_IDENTITY="Apple Development: …" \
   through the same command, debounced. `apply_system` pushes the two settings
   the OS holds a copy of (login item via `tauri-plugin-autostart`, Dock icon
   via the activation policy) at startup and whenever they change.
+  `apply_dock_icon` is also called when the editor window is created and
+  destroyed, because the `dock_icon` while-open mode shows the icon only while
+  that window exists (not the default: each switch to Regular puts a tile in
+  the Dock's recents); the policy is set to Regular *before* the window is
+  built so macOS will focus it. The **initial** policy must go through
+  `App::set_activation_policy` in `setup`: tao applies that value in
+  `applicationDidFinishLaunching`, after `setup`, so a runtime call made
+  there is overwritten and the Dock icon reappears. `src-tauri/Info.plist`
+  additionally declares `LSUIElement`, so LaunchServices itself starts the
+  app as a menu-bar app; the runtime policy then only ever adds the icon.
 - `naming.rs` expands file-name patterns (`%year%/%month%/shot-%time%`). It
   is pure except `resolve`, which touches the folder to satisfy `%n%`. Add a
   token in `TOKENS` **and** `token()`; the panel lists `TOKENS` and the tests
@@ -93,6 +105,12 @@ APPLE_SIGNING_IDENTITY="Apple Development: …" \
   release with `latest.json`; the public repo gets Actions minutes for free.
 
 ## Gotchas
+
+- `tauri build` on macOS sometimes leaves the DMG's temporary image mounted
+  (`/Volumes/dmg.xxxxxx`) after `bundle_dmg.sh` fails, and every later build
+  then fails the same way while the `.app` is complete. Eject it
+  (`hdiutil detach /Volumes/dmg.* -force`) or build with `--bundles app` when
+  only the bundle is needed.
 
 - `bundle.createUpdaterArtifacts` is on, so `tauri build` fails at the very
   end without `TAURI_SIGNING_PRIVATE_KEY` (the key's contents; the CLI 2.11

@@ -212,6 +212,13 @@ pub fn show_editor(app: &AppHandle) {
             let _ = window.emit("capture-new", ());
             return;
         }
+        // The Dock icon may need to appear before the window does (macOS
+        // cannot focus a window of an accessory app the same way).
+        let dock_mode = handle.state::<AppState>().settings().dock_icon;
+        if dock_mode != crate::settings::DockIcon::Never {
+            #[cfg(target_os = "macos")]
+            let _ = handle.set_activation_policy(tauri::ActivationPolicy::Regular);
+        }
         let built =
             WebviewWindowBuilder::new(&handle, EDITOR_LABEL, WebviewUrl::App("index.html".into()))
                 .title("Axio Capture")
@@ -222,17 +229,25 @@ pub fn show_editor(app: &AppHandle) {
         match built {
             Ok(window) => {
                 let this = window.clone();
+                // Closing really closes: the window is destroyed and its
+                // annotations with it. The capture itself stays in memory, so
+                // "Open editor" in the tray brings it back clean. The app
+                // keeps running from the tray (see `ExitRequested` in lib.rs).
                 window.on_window_event(move |event| match event {
-                    // Closing hides: the annotations survive and reopening is instant.
-                    tauri::WindowEvent::CloseRequested { api, .. } => {
-                        api.prevent_close();
-                        let _ = this.hide();
-                    }
                     // Dropping an image file onto the editor opens it.
                     tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Drop { paths, .. }) => {
                         if let Some(path) = paths.first() {
                             open_file(this.app_handle(), path);
                         }
+                    }
+                    // With no window left, drop back to a menu-bar-only app.
+                    tauri::WindowEvent::Destroyed => {
+                        let app = this.app_handle().clone();
+                        std::thread::spawn(move || {
+                            std::thread::sleep(Duration::from_millis(100));
+                            let mode = app.state::<AppState>().settings().dock_icon;
+                            crate::settings::apply_dock_icon(&app, mode);
+                        });
                     }
                     _ => {}
                 });

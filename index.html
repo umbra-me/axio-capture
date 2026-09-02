@@ -107,9 +107,13 @@
           <input type="checkbox" name="check_updates" />
           <span>Check for updates automatically</span>
         </label>
-        <label class="row check" id="dock-row">
-          <input type="checkbox" name="show_in_dock" />
-          <span>Show in the Dock (off makes it a menu-bar app)</span>
+        <label class="row" id="dock-row">
+          <span>Dock icon</span>
+          <select name="dock_icon">
+            <option value="never">Never (menu-bar app)</option>
+            <option value="while-editor-open">Only while the editor is open (leaves a tile in Dock recents)</option>
+            <option value="always">Always</option>
+          </select>
         </label>
         <p class="help">The last tool, colour and width you used are remembered automatically.</p>
         <p class="help" id="settings-path"></p>

@@ -45,18 +45,23 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(state::AppState::default())
         .setup(|app| {
-            let handle = app.handle();
-            let loaded = settings::load(handle);
-            if let Err(error) = hotkey::register(handle, &loaded.shortcut) {
+            let handle = app.handle().clone();
+            let loaded = settings::load(&handle);
+            if let Err(error) = hotkey::register(&handle, &loaded.shortcut) {
                 eprintln!("axio-capture: {error}; falling back to {CAPTURE_SHORTCUT}");
-                hotkey::register(handle, CAPTURE_SHORTCUT)?;
+                hotkey::register(&handle, CAPTURE_SHORTCUT)?;
             }
+            // The initial policy must be set on `App` before the loop runs:
+            // tao applies it in applicationDidFinishLaunching, after this.
+            #[cfg(target_os = "macos")]
+            app.set_activation_policy(settings::initial_activation_policy(&loaded));
+            settings::apply_system(&handle, &loaded);
             *app.state::<state::AppState>()
                 .settings
                 .lock()
                 .expect("settings lock") = loaded;
-            tray::install(handle)?;
-            cli::handle(handle, std::env::args().skip(1), None, false);
+            tray::install(&handle)?;
+            cli::handle(&handle, std::env::args().skip(1), None, false);
             let startup = handle.clone();
             std::thread::spawn(move || {
                 install::offer_move_to_applications(&startup);
@@ -83,7 +88,8 @@ pub fn run() {
         .expect("error while building Axio Capture")
         .run(|app, event| {
             if let tauri::RunEvent::ExitRequested { api, code, .. } = &event {
-                // Closing the editor must not quit a tray application.
+                // Closing the last window must not quit a tray application;
+                // only an explicit exit (tray Quit, updater restart) carries a code.
                 if code.is_none() {
                     api.prevent_exit();
                 }
