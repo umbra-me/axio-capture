@@ -160,7 +160,9 @@ src/shared/ipc.ts   the typed command layer between the two sides
 .github/workflows/  the tagged-release build
 ```
 
-See `AGENTS.md` for the architecture and the platform gotchas.
+See `AGENTS.md` for the architecture and the platform gotchas, and
+`docs/handoff.md` for the pick-up-here page: where everything lives, how to
+release, what is proven, and what comes next.
 
 ## License
 

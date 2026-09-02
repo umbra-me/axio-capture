@@ -5,6 +5,9 @@ macOS, Windows and Linux. Rust owns the pixels and every side effect; the two
 web pages only draw. Optional component `axio/capture` of the Axio workspace:
 it installs onto a workstation and deploys nothing, like Deck and Analyst.
 
+`docs/handoff.md` is the pick-up-here page: locations, keys, release
+procedure, decisions, verification state, next steps. Keep it true.
+
 ## Commands
 
 ```bash
