@@ -1,10 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <rect x="64" y="64" width="896" height="896" rx="200" fill="#111318"/>
-  <g fill="none" stroke="#f4f4f5" stroke-width="72" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M232 400V304a72 72 0 0 1 72-72h96"/>
-    <path d="M624 232h96a72 72 0 0 1 72 72v96"/>
-    <path d="M792 624v96a72 72 0 0 1-72 72h-96"/>
-    <path d="M400 792h-96a72 72 0 0 1-72-72v-96"/>
-  </g>
-  <circle cx="512" cy="512" r="96" fill="#7c5cff"/>
+  <!-- The Axio capture mark. Source of truth: tools/brand/marks in the Axio workspace. -->
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#141925"/>
+      <stop offset="1" stop-color="#0a0d13"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.32" cy="0.22" r="0.75">
+      <stop offset="0" stop-color="#55dcb0" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#55dcb0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.03"/>
+    </linearGradient>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#ground)"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#glow)"/>
+  <rect x="68" y="68" width="888" height="888" rx="196" fill="none" stroke="url(#lit)" stroke-width="8"/>
+  <svg x="248" y="248" width="528" height="528" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 9V6.5A2.5 2.5 0 0 1 6.5 4H9" stroke="#f4f5f7" stroke-width="2.6"/>
+    <path d="M15 4h2.5A2.5 2.5 0 0 1 20 6.5V9" stroke="#f4f5f7" stroke-width="2.6"/>
+    <path d="M20 15v2.5a2.5 2.5 0 0 1-2.5 2.5H15" stroke="#f4f5f7" stroke-width="2.6"/>
+    <path d="M9 20H6.5A2.5 2.5 0 0 1 4 17.5V15" stroke="#f4f5f7" stroke-width="2.6"/>
+    <circle cx="12" cy="12" r="3.4" fill="#55dcb0"/>
+  </svg>
 </svg>

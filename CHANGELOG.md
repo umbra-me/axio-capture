@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- New app icon: the Axio family mark, the slate tile with the selection
+  corners and a mint point, replacing the off-palette violet. Source of truth
+  is `tools/brand/marks/capture.svg` in the Axio workspace; `icons/source.svg`
+  is its copy. The menu-bar template is unchanged.
+
 ## 0.1.0 (2026-09-02)
 
 First release.
