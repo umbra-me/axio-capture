@@ -181,3 +181,36 @@ are under `src-tauri/target/release/bundle/macos/`. Notarization was explicitly
 skipped because no notary authentication was configured. This checkpoint does
 not establish notarization, stapling, Gatekeeper acceptance or public-feed
 delivery, and did not replace the installed application.
+
+## Notarized Apple Silicon candidate and fresh updater signature
+
+Apple accepted submission `9f60e343-7718-4cf6-a305-64dd061fa229` in the reviewed
+one-off [run 33956732732](https://github.com/notzenco/lexis-apple-build/actions/runs/33956732732),
+workflow source `b638cc80951aa6094f168f75f974374965432b68`. Its decision was
+Accepted / Ready for distribution, with no issues. The private input archive
+matched the `841da47b…` hash above. Encrypted results were HMAC-verified before
+decryption. Stapler validation, strict recursive codesign, and Gatekeeper
+`source=Notarized Developer ID` passed on both the runner and the owner's Mac.
+
+Final stapled updater archive SHA-256:
+`478b3f282ee3b8ae1f97088cae1d9e1075388c4622e415f081c1cbe72658712e`.
+The existing local Tauri updater key signed that final archive again; independent
+`minisign-verify` 0.2.5 verification passed and a one-byte tampered payload was
+rejected. The original pre-stapling signature must not be reused.
+
+Protected local evidence/artifacts are under
+`~/.local/share/axio-capture-notarization/20260905/run-33956732732/`:
+`decrypted/capture-results/` contains the archive, fresh `.sig`, Apple JSON and
+acceptance logs; `stapled/Axio Capture.app` is the verified app; `signature-proof/`
+contains the separate updater proof. No signing keys are stored in this repo.
+
+The signed runtime source remains `31080b5e685dc46ca3f7e53b253d124655a6b950`.
+Every later change through this release-preparation checkpoint is documentation
+only, verified by the Git file diff. Product versions remain 0.1.1. A v0.1.1 tag
+triggers four jobs in the existing public release workflow and creates a DRAFT.
+The Apple Silicon CI artifact must be replaced with this notarized candidate,
+its fresh signature, and the matching feed entry. Do not publish the draft while
+Intel macOS is ad-hoc/unnotarized or remaining platform/runtime gates are open.
+This checkpoint does not replace `/Applications/Axio Capture.app` or establish
+public-feed delivery. Windows/Linux installer runtime, Wayland/mixed-DPI,
+macOS screen selection, cancellation/refusal and attachment import remain gated.

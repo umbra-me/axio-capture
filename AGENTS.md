@@ -130,7 +130,12 @@ they are exercised:
   CI packages do not establish 0.1.1 installer or updater acceptance.
 - September 5 isolated macOS fixture: genuine 0.1.0 source updated through a
   signed localhost feed to 0.1.1, restarted and exported a verified attachment.
-  Production-feed update, refusal cases and notarization remain open.
+  Production-feed update and cancellation/refusal remain open; a tampered update was rejected.
+- September 5 release candidate: Apple Silicon 0.1.1 is Developer ID signed,
+  notarized and stapled; local and runner Gatekeeper checks accept it. The final
+  archive has a fresh independently verified updater signature. Intel macOS CI
+  packaging still lacks Developer ID/notarization; keep the cross-platform draft
+  unpublished until its release gates pass. See the dated change-set receipt.
 - Never exercised: launch at login,
   notifications, the move-to-Applications offer, the settings panel's
   interactions inside the real webview (layout and the file round-trip were

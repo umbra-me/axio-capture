@@ -31,7 +31,7 @@ Apache-2.0, public from day one.
 | Release | https://github.com/umbra-me/axio-capture/releases/tag/v0.1.0, tag at `4180fa2` |
 | Update feed | `https://github.com/umbra-me/axio-capture/releases/latest/download/latest.json`, declared in `src-tauri/tauri.conf.json` under `plugins.updater` |
 | Updater signing key | Private: `~/.tauri/axio-capture.key` on the owner's Mac (no password); backed up as a note in Proton Pass, vault **Umbra**, "axio-capture updater signing key"; set as repository secret `TAURI_SIGNING_PRIVATE_KEY`. Public half is in `tauri.conf.json`. **Losing the private key means no installed copy can ever update again.** |
-| Code-signing identity | `Developer ID Application: KIAN PHILIP WATKINS (N7447R8KW2)` in the owner's login Keychain; verified September 5 signed build, expires September 6, 2031. Notarization authentication is pending. CI has no Developer ID certificate secrets configured. |
+| Code-signing identity | `Developer ID Application: KIAN PHILIP WATKINS (N7447R8KW2)` in the owner's login Keychain; verified September 5 signed build, expires September 6, 2031. The Apple Silicon 0.1.1 candidate is notarized/stapled through the reviewed one-off release workflow. CI still has no Developer ID certificate secrets; its macOS outputs require replacement or separate signing/notarization. |
 | Installed copy | `/Applications/Axio Capture.app` on the owner's Mac, a local signed build of 0.1.0 |
 | Settings file | `~/Library/Application Support/me.umbra.axio-capture/settings.json` (macOS); platform config dir elsewhere |
 | Captures | `~/Pictures/Axio Capture` by default; configurable |
@@ -141,20 +141,23 @@ signed local build. In CI: all four platform builds and the release feed.
 Not run anywhere: the Windows and Linux installers. Wayland is the least
 certain (portal capture, GlobalShortcuts portal for the hotkey).
 
-Wired, never exercised: in-app updating (nothing older than 0.1.0 exists),
-launch at login, notifications, the move-to-Applications offer.
-
-Not done: notarisation. Another Mac needs right-click, Open on first launch.
+Proven September 5: an isolated 0.1.0 fixture accepted a signed localhost update
+to 0.1.1 and rejected a tampered archive. The final Apple Silicon candidate is
+Developer ID signed, notarized, stapled and accepted by Gatekeeper. These checks
+do not establish public-feed delivery, Intel notarization or installer runtime.
+Launch at login, notifications and the move-to-Applications offer remain manual
+gates. See the dated change-set receipt for exact provenance.
 
 ## Next steps, in order
 
-1. Tag `v0.1.1` with any small change and watch the installed 0.1.0 offer
-   and apply it. Until then the updater is a belief.
-2. Run the Windows installer and the Linux deb or AppImage on real machines.
-   On Linux, try X11 first, then a Wayland compositor with the GlobalShortcuts
-   portal (GNOME 47+, KDE Plasma 6).
-3. Decide on notarisation when distribution beyond the owner's Macs
-   matters; it needs a Developer ID certificate and the CI secrets for it.
+1. Prepare the v0.1.1 cross-platform draft. Replace its Apple Silicon CI output
+   with the verified notarized candidate and fresh updater signature, updating
+   the matching feed entry. Keep the draft unpublished while Intel macOS remains
+   ad-hoc/unnotarized or platform acceptance is incomplete.
+2. Run Windows and Linux installers on real machines. Verify Windows selection,
+   Linux X11, Wayland portal capture/hotkey, mixed-DPI and attachment import.
+3. Verify public-feed upgrade and cancellation/refusal, plus remaining macOS
+   screen-selection and system-integration behavior in an isolated fixture.
 4. Then the roadmap the product was started for, roughly in this order:
    window and full-screen capture; the MCP server and CLI mirror; the
    structured sidecar and model-ready output profile; accessibility-tree
