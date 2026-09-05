@@ -160,3 +160,24 @@ and companion-app attachment import remain the separately recorded gates.
 Only this acceptance receipt changed; no runtime source, signing asset, public
 release, updater feed or installed application was changed by this documentation
 checkpoint.
+
+
+## Developer ID signing checkpoint
+
+The owner issued a Developer ID Application certificate for team N7447R8KW2 on
+September 5. Its public key matched the prepared private key; both were imported
+into the login Keychain. The certificate expires September 6, 2031. Key material
+is stored outside repositories and is not part of this receipt.
+
+Source `31080b5e685dc46ca3f7e53b253d124655a6b950` produced the genuine
+`me.umbra.axio-capture` 0.1.1 app and signed updater archive. Strict recursive
+codesign verification passed, showing Developer ID Application, Developer ID CA
+and Apple Root CA authorities, team N7447R8KW2, hardened runtime and trusted
+timestamp September 5 at 16:30:16 AWST. Archive SHA-256:
+`841da47ba15fca08fbb5896b0f17d6e2ab30703963084feabc6184647b6d7e3f`.
+
+Build log: `/tmp/axio-capture-developer-id-build.log`. The app/updater artifacts
+are under `src-tauri/target/release/bundle/macos/`. Notarization was explicitly
+skipped because no notary authentication was configured. This checkpoint does
+not establish notarization, stapling, Gatekeeper acceptance or public-feed
+delivery, and did not replace the installed application.

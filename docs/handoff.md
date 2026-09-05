@@ -31,7 +31,7 @@ Apache-2.0, public from day one.
 | Release | https://github.com/umbra-me/axio-capture/releases/tag/v0.1.0, tag at `4180fa2` |
 | Update feed | `https://github.com/umbra-me/axio-capture/releases/latest/download/latest.json`, declared in `src-tauri/tauri.conf.json` under `plugins.updater` |
 | Updater signing key | Private: `~/.tauri/axio-capture.key` on the owner's Mac (no password); backed up as a note in Proton Pass, vault **Umbra**, "axio-capture updater signing key"; set as repository secret `TAURI_SIGNING_PRIVATE_KEY`. Public half is in `tauri.conf.json`. **Losing the private key means no installed copy can ever update again.** |
-| Code-signing identity | `Apple Development: KIAN PHILIP WATKINS (48XQCW9X5U)` in the owner's keychain; used for local release builds via `APPLE_SIGNING_IDENTITY`. CI builds are ad-hoc signed (no certificate secrets configured) |
+| Code-signing identity | `Developer ID Application: KIAN PHILIP WATKINS (N7447R8KW2)` in the owner's login Keychain; verified September 5 signed build, expires September 6, 2031. Notarization authentication is pending. CI has no Developer ID certificate secrets configured. |
 | Installed copy | `/Applications/Axio Capture.app` on the owner's Mac, a local signed build of 0.1.0 |
 | Settings file | `~/Library/Application Support/me.umbra.axio-capture/settings.json` (macOS); platform config dir elsewhere |
 | Captures | `~/Pictures/Axio Capture` by default; configurable |
