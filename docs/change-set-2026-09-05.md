@@ -23,9 +23,31 @@ Scheduled update checks skip disabled polls without ending the worker, so enabli
 checks later resumes at the next scheduled poll (up to six hours later). Debug
 builds still do not schedule checks. The interactive tray action remains separate.
 
-Remaining gates: an actual 0.1.0 → 0.1.1 download/install update, Windows/Linux
-runtime acceptance, attachment export/import in the real apps, and public macOS
-Developer ID signing/notarisation. No updater feed or installed app is changed
-by publishing these source commits.
+## Native checkpoint
 
-Validation on September 5: 12 Rust tests, Clippy with denied warnings, formatting, frontend build and v0.1.1 version agreement passed.
+On September 5, macOS, Windows 11 and isolated Debian bookworm/aarch64 each
+passed 12 Rust tests, strict all-target Clippy and a standalone `custom-protocol`
+build. Formatting, frontend build and v0.1.1 version agreement passed. Windows
+used an isolated temporary checkout/state directory. Linux ran in an isolated
+OrbStack Docker container with WebKitGTK 4.1 and X11 dependencies; this is not
+acceptance on a user's Wayland desktop.
+
+The Linux native editor rendered the bundled 128×128 icon via `--open`. Clicking
+**Export attachment** produced the PNG and schema-1 manifest with matching SHA-256
+`a99a28064cc2e5887fa37c33d742ddbd4d0488138867b06a22d5ba82f250a492`.
+The native status displayed the ready attachment path. This proves X11 editor
+rendering and attachment export, but not screen selection, mixed-DPI, clipboard
+ownership after exit, Wayland portals or companion-app import.
+
+macOS 0.1.1 `.app`, updater `.app.tar.gz` and `.sig` artifacts were built using
+the existing Apple Development identity and the external updater key at
+`~/.tauri/axio-capture.key`. Key contents remain outside source and logs. No
+Developer ID identity was available; the build skipped notarization. These are
+local acceptance artifacts, not a completed public macOS release. The installed
+0.1.0 application and public updater feed were left unchanged.
+
+Remaining gates: source publication and supported release packaging; actual
+0.1.0 → 0.1.1 signed download/install/restart; Windows native editor/selection;
+macOS 0.1.1 editor/selection; Wayland and mixed-DPI; companion-app import; public
+macOS Developer ID signing/notarisation. Local build success does not close these
+gates. No release tag or updater feed was published by this checkpoint.

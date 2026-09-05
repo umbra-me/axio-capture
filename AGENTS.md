@@ -121,9 +121,11 @@ they are exercised:
 - Proven on macOS (owner, Apple Silicon, 2026-09-02): capture, overlay
   placement, permission recovery, editor tools, settings, real close,
   menu-bar mode, signed local build, CI release for all platforms.
-- Compiles and packages only: Windows (NSIS, MSI) and Linux (deb, rpm,
-  AppImage). No runtime run on either. Wayland capture and hotkey are the
-  first things to check on Linux.
+- September 5 native checkpoint: Windows 11 and Debian/aarch64 pass tests,
+  strict Clippy and standalone debug builds. The isolated Linux X11 editor
+  renders and exports a verified PNG/manifest attachment. Windows runtime,
+  Wayland capture/hotkey and mixed-DPI remain unverified. Historical 0.1.0
+  CI packages do not establish 0.1.1 installer or updater acceptance.
 - Never exercised: the updater's download-and-install path (needs a
   `v0.1.1` release and an installed 0.1.0 to prove), launch at login,
   notifications, the move-to-Applications offer, the settings panel's
