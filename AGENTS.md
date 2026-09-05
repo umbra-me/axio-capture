@@ -14,9 +14,10 @@ procedure, decisions, verification state, next steps. Keep it true.
 pnpm install                    # once; esbuild's postinstall is approved in pnpm-workspace.yaml
 pnpm app                        # tauri dev: the app against the Vite dev server
 pnpm app:build                  # tauri build: installers under src-tauri/target/release/bundle
+pnpm lint                       # ESLint source checks
+pnpm typecheck                  # standalone TypeScript check
 pnpm test                       # frontend behavior tests (Vitest/jsdom)
 pnpm build                      # frontend only: tsc --noEmit && vite build
-pnpm typecheck                  # the only step that checks TypeScript types
 cd src-tauri && cargo check     # fastest Rust loop
 cd src-tauri && cargo test      # selection mapping and crop tests
 cd src-tauri && cargo clippy --all-targets

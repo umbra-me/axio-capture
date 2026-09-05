@@ -655,7 +655,8 @@ window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (mod && key === "z") {
     event.preventDefault();
-    event.shiftKey ? redo() : undo();
+    if (event.shiftKey) redo();
+    else undo();
   } else if (mod && key === "y") {
     event.preventDefault();
     redo();

@@ -169,3 +169,5 @@ release, what is proven, and what comes next.
 ## License
 
 Apache-2.0. See `LICENSE` and `NOTICE`.
+
+Frontend lint and standalone typecheck commands: [September 5 verification](docs/lint-verification-2026-09-05.md).
