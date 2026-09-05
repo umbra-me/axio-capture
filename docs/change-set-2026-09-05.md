@@ -214,3 +214,59 @@ Intel macOS is ad-hoc/unnotarized or remaining platform/runtime gates are open.
 This checkpoint does not replace `/Applications/Axio Capture.app` or establish
 public-feed delivery. Windows/Linux installer runtime, Wayland/mixed-DPI,
 macOS screen selection, cancellation/refusal and attachment import remain gated.
+
+## Verified cross-platform draft assets
+
+Release run `33957014450` passed all four jobs at tag `v0.1.1`, exact source
+`3313dcd1d1960da4c013a878ba3d7d36bec93997`. Runtime source remains identical to
+signed `31080b5`. Subsequent receipt changes do not rebuild the release.
+The draft remains unpublished; the installed application was not replaced.
+
+Packaging notarization run `33957685514` used workflow
+`913464f507e6296eeed860bda321d4072dc36a53`. Apple accepted Intel app submission
+`eb32e870-72c6-44ee-a132-4fd63066aa26`, Intel DMG
+`1c23bd85-f421-4bf9-9650-aaf84b10fb6c`, and Apple Silicon DMG
+`bf5ecab5-605c-4a74-9565-1dc46061523a`. Stapling, strict signatures and Gatekeeper
+passed on the runner and locally. Intel architecture/version were x86_64/0.1.1;
+Developer ID and hardened runtime signing preceded submission. Both DMGs contain
+the matching signed app and Applications link. Intel runtime was not exercised.
+
+The Intel result tar contained AppleDouble `._` sidecars that broke strict
+codesign after portable extraction. Native extraction restored metadata;
+`COPYFILE_DISABLE=1 tar -czf ...` repacked without sidecars, preserving the valid
+app and stapled ticket. The FINAL Intel archive received a fresh updater signature.
+Apple Silicon had zero sidecars and retained its verified archive/signature.
+Both workflow tar commands were fixed in build-repository commit
+`5788ffd856ffbd2e9e73cee886ca386f747f4c16`; executed workflow SHAs remain as above.
+No notarization was repeated for this packaging correction.
+
+All 17 draft assets were independently downloaded. Seven macOS/feed replacements
+matched local hashes. Both downloaded updater signatures passed independent
+minisign verification and rejected a one-byte tamper. Both archives had zero
+sidecars; Python 3.13 safe extraction, strict codesign, stapler validation,
+architecture and Gatekeeper checks passed. Plain and `-app` macOS feed aliases
+match their final signatures and v0.1.1 URLs; all seven non-macOS feed entries
+were preserved exactly. Public-feed upgrade and manual platform acceptance remain
+separate. The draft has concise release notes documenting those limits.
+
+### Downloaded asset receipt
+
+| Asset | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `Axio.Capture-0.1.1-1.x86_64.rpm` | 3573589 | `18acd5e9cdc562f529b3c0e22c67c753d61d3431958b9e18a4220661de83368a` |
+| `Axio.Capture-0.1.1-1.x86_64.rpm.sig` | 424 | `eb287640558a00553053f11675cffc72dcede20e28e8c8e9b51abc00117fadbe` |
+| `Axio.Capture_0.1.1_aarch64.dmg` | 3426488 | `2e5fc07d4e774c9963bcd32878d62aa83b02a5463c2b78b9a7e1eb82175ce815` |
+| `Axio.Capture_0.1.1_amd64.AppImage` | 78776824 | `7ad9d0c4e7aff6ecaccbee82ea319856f2746672ecef41e5d237c292d21e3a78` |
+| `Axio.Capture_0.1.1_amd64.AppImage.sig` | 424 | `ee4a0f2c4e0da28214ccf6f2758a0e76fa46ce7eae06cb3cbe96e60d78b94ee9` |
+| `Axio.Capture_0.1.1_amd64.deb` | 3572444 | `d478f9f498778f6bfe6c8d0b269958793d40ab3c07529617f7347275f91ec8b5` |
+| `Axio.Capture_0.1.1_amd64.deb.sig` | 420 | `3eeaa0fd8ef4e5c6606d2e76f5f9c160e78c22a1ffaf5de0bb7982f73947962c` |
+| `Axio.Capture_0.1.1_x64-setup.exe` | 2174363 | `3a7b9606084644fe00a93a0f9d09df1570ec3e0b9ff08ba208a67d49ce8fc7ca` |
+| `Axio.Capture_0.1.1_x64-setup.exe.sig` | 424 | `47fcea23a8f6f92a27dc7b5ebba083a772994a20ca779361a5e5c2269cb7d320` |
+| `Axio.Capture_0.1.1_x64.dmg` | 3770582 | `ff2a0573a0ca45dc5ee5cc06139be288b11c14eebe5985c77940d60ff143ee23` |
+| `Axio.Capture_0.1.1_x64_en-US.msi` | 2994176 | `ca0da51497a8c272151c3c092d9dbd4fa23a4d960b0fffdd262ca632c70d5057` |
+| `Axio.Capture_0.1.1_x64_en-US.msi.sig` | 424 | `2e9abcf21fdf41df46cce665b87ca1444272e170a0be805b2e7c869795b687c3` |
+| `Axio.Capture_aarch64.app.tar.gz` | 2878782 | `478b3f282ee3b8ae1f97088cae1d9e1075388c4622e415f081c1cbe72658712e` |
+| `Axio.Capture_aarch64.app.tar.gz.sig` | 424 | `b7ca37839d91a76b0655b9b4bf8584985e5245ce337ec55d99583c5e9ebb28ca` |
+| `Axio.Capture_x64.app.tar.gz` | 3167292 | `9c3909b2e703caee40d5f9a85683259448c8f9245ec1554865b2d75e7969c610` |
+| `Axio.Capture_x64.app.tar.gz.sig` | 444 | `fac88f675266de28bc25c0fb886187c9a47f81f5be20590eafdc9370a2128d7b` |
+| `latest.json` | 6735 | `92a3dae8f377e4d528fe7b9764f119fae689b79a4250d433571ba71b701b8689` |

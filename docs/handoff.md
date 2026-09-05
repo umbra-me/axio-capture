@@ -152,8 +152,8 @@ gates. See the dated change-set receipt for exact provenance.
 
 1. Prepare the v0.1.1 cross-platform draft. Replace its Apple Silicon CI output
    with the verified notarized candidate and fresh updater signature, updating
-   the matching feed entry. Keep the draft unpublished while Intel macOS remains
-   ad-hoc/unnotarized or platform acceptance is incomplete.
+   the matching feed entry. Intel and both DMGs now pass notarization; the verified draft awaits final
+   release-coordinator review before public promotion.
 2. Run Windows and Linux installers on real machines. Verify Windows selection,
    Linux X11, Wayland portal capture/hotkey, mixed-DPI and attachment import.
 3. Verify public-feed upgrade and cancellation/refusal, plus remaining macOS
@@ -184,3 +184,26 @@ gates. See the dated change-set receipt for exact provenance.
 - A previous build's default can be persisted into the user's settings file
   by the editor's preference writes. Changing a default does not change an
   existing file; check the JSON when behaviour looks stale.
+
+## Portable updater archive acceptance
+
+Both downloaded final archives contain no AppleDouble sidecars. Test portable
+extraction with Python 3.13 or later; macOS tar alone can merge sidecars and hide
+a broken archive. Set ARCHIVE to the downloaded tar and EXTRACTED to a fresh
+local temporary directory, then run:
+
+```sh
+python3.13 - "$ARCHIVE" "$EXTRACTED" <<'PY'
+import pathlib, sys, tarfile
+with tarfile.open(sys.argv[1]) as archive:
+    assert not any(pathlib.PurePosixPath(m.name).name.startswith("._") for m in archive.getmembers())
+    archive.extractall(sys.argv[2], filter="data")
+PY
+codesign --verify --deep --strict "$EXTRACTED/Axio Capture.app"
+xcrun stapler validate "$EXTRACTED/Axio Capture.app"
+spctl --assess --type execute "$EXTRACTED/Axio Capture.app"
+```
+
+Repeat for both architectures and independently verify each updater signature.
+The September 5 receipt records the downloaded checks, asset hashes and preserved
+feed entries. Repacking always requires a fresh updater signature.

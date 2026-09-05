@@ -133,9 +133,9 @@ they are exercised:
   Production-feed update and cancellation/refusal remain open; a tampered update was rejected.
 - September 5 release candidate: Apple Silicon 0.1.1 is Developer ID signed,
   notarized and stapled; local and runner Gatekeeper checks accept it. The final
-  archive has a fresh independently verified updater signature. Intel macOS CI
-  packaging still lacks Developer ID/notarization; keep the cross-platform draft
-  unpublished until its release gates pass. See the dated change-set receipt.
+  archive has a fresh independently verified updater signature. Intel and both DMGs are now notarized/stapled too; all four CI jobs passed
+  and verified candidates replaced the draft macOS assets. The draft awaits
+  release-coordinator review; manual runtime cases remain distinct. See the dated change-set receipt.
 - Never exercised: launch at login,
   notifications, the move-to-Applications offer, the settings panel's
   interactions inside the real webview (layout and the file round-trip were
