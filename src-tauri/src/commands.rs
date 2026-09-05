@@ -256,6 +256,15 @@ pub async fn export_png(
     }
 
     match action.as_str() {
+        "handoff" => {
+            let path =
+                crate::handoff::export(&png, &export::save_dir(&settings).join("Attachments"))
+                    .map_err(|e| format!("{e:#}"))?;
+            Ok(ExportResult {
+                action,
+                path: Some(path.display().to_string()),
+            })
+        }
         "copy" => {
             export::copy(&png).map_err(|e| format!("{e:#}"))?;
             if settings.close_on_copy {

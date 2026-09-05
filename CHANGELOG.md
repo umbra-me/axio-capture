@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- September 5: Prepare 0.1.1 with annotated PNG/JSON attachment export, release preflight checks and resumable scheduled update polling. No tag published. See [change set](docs/change-set-2026-09-05.md).
+
 - New app icon: the Axio family mark, the slate tile with the selection
   corners and a mint point, replacing the off-palette violet. Source of truth
   is `tools/brand/marks/capture.svg` in the Axio workspace; `icons/source.svg`

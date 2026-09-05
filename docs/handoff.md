@@ -1,5 +1,9 @@
 # Axio Capture handoff
 
+For the September 5 implementation and its remaining gates, see
+[the current change set](change-set-2026-09-05.md). Earlier verification entries
+below apply to their recorded revisions, not automatically to this change.
+
 The pick-up-here page. Written 2026-09-02 at the 0.1.0 release. If a fact
 here disagrees with the code or the release page, the code and the release
 page win; update this file.

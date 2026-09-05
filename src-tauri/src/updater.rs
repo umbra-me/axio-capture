@@ -20,14 +20,13 @@ pub fn schedule(app: AppHandle) {
     std::thread::spawn(move || {
         std::thread::sleep(FIRST_CHECK_DELAY);
         loop {
-            if !app
+            if app
                 .state::<crate::state::AppState>()
                 .settings()
                 .check_updates
             {
-                return;
+                run(&app, false);
             }
-            run(&app, false);
             std::thread::sleep(RECHECK_EVERY);
         }
     });

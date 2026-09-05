@@ -9,6 +9,7 @@ mod capture;
 mod cli;
 mod commands;
 mod export;
+mod handoff;
 mod hotkey;
 mod install;
 mod naming;

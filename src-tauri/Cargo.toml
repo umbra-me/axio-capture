@@ -1,6 +1,6 @@
 [package]
 name = "axio-capture"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Region screenshots with an annotation editor, for people and agents"
 license = "Apache-2.0"
@@ -12,6 +12,7 @@ name = "axio_capture_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [dependencies]
+sha2 = "0.10.9"
 anyhow = "1"
 arboard = "3.6"
 chrono = "0.4"

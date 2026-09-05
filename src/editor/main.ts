@@ -561,6 +561,9 @@ async function doExport(action: ExportAction): Promise<void> {
       case "copy":
         setStatus("Copied to clipboard");
         break;
+      case "handoff":
+        setStatus("Attachment ready — in Axio, choose Start Codex with Capture", result.path);
+        break;
       case "save":
       case "save-as":
         setStatus("Saved", result.path);
@@ -642,6 +645,7 @@ $("clear").addEventListener("click", () => {
 });
 $("copy").addEventListener("click", () => void doExport("copy"));
 $("save").addEventListener("click", () => void doExport("save"));
+$("handoff").addEventListener("click", () => void doExport("handoff"));
 $("save-as").addEventListener("click", () => void doExport("save-as"));
 $("new-capture").addEventListener("click", () => void startCapture());
 

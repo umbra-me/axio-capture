@@ -1,12 +1,14 @@
 # Axio Capture
 
+Current source changes and verification gates: [September 5 change set](docs/change-set-2026-09-05.md).
+
 Region screenshots with an annotation editor, for macOS, Windows and Linux.
 Press the hotkey, drag a rectangle, draw on it, copy or save. Part of the
 [Axio](https://axio.sh) family of developer tools.
 
 This is the first cut. It captures a region, lets you annotate it, and keeps
 itself updated. Window and full-screen capture, recording, uploaders and the
-agent-facing API (an MCP server, structured capture metadata, redaction) are
+agent-facing API (an MCP server, live capture control, redaction) are
 later milestones, not missing pieces of this one.
 
 ## Status

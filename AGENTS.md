@@ -174,3 +174,5 @@ they are exercised:
 - Wayland captures go through the desktop portal (xcap); the global shortcut
   needs a compositor that implements the GlobalShortcuts portal. X11 works
   without either. Multi-monitor mixed-DPI on Linux is untested.
+
+Current integration, schema and release boundaries: [September 5 change set](docs/change-set-2026-09-05.md). Keep its completed and pending validation separate.

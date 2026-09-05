@@ -32,11 +32,11 @@ export interface Settings {
 }
 
 export interface ExportResult {
-  action: "copy" | "save" | "save-as" | "reveal" | "cancelled";
+  action: "copy" | "save" | "save-as" | "handoff" | "reveal" | "cancelled";
   path: string | null;
 }
 
-export type ExportAction = "copy" | "save" | "save-as" | "reveal";
+export type ExportAction = "copy" | "save" | "save-as" | "handoff" | "reveal";
 
 /** Fetch PNG bytes from a command that answers with a raw body. */
 export async function fetchBitmap(
