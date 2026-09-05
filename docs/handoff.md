@@ -150,10 +150,10 @@ gates. See the dated change-set receipt for exact provenance.
 
 ## Next steps, in order
 
-1. Prepare the v0.1.1 cross-platform draft. Replace its Apple Silicon CI output
-   with the verified notarized candidate and fresh updater signature, updating
-   the matching feed entry. Intel and both DMGs now pass notarization; the verified draft awaits final
-   release-coordinator review before public promotion.
+1. Published v0.1.1 is the current release. Both macOS updater apps and DMGs
+   are notarized/stapled; all four CI jobs passed. Unauthenticated public feed
+   and all seven unique updater downloads have verified signatures and hashes.
+   An installed-app public-feed upgrade remains distinct from delivery checks.
 2. Run Windows and Linux installers on real machines. Verify Windows selection,
    Linux X11, Wayland portal capture/hotkey, mixed-DPI and attachment import.
 3. Verify public-feed upgrade and cancellation/refusal, plus remaining macOS

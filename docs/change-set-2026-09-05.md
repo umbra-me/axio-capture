@@ -270,3 +270,24 @@ separate. The draft has concise release notes documenting those limits.
 | `Axio.Capture_x64.app.tar.gz` | 3167292 | `9c3909b2e703caee40d5f9a85683259448c8f9245ec1554865b2d75e7969c610` |
 | `Axio.Capture_x64.app.tar.gz.sig` | 444 | `fac88f675266de28bc25c0fb886187c9a47f81f5be20590eafdc9370a2128d7b` |
 | `latest.json` | 6735 | `92a3dae8f377e4d528fe7b9764f119fae689b79a4250d433571ba71b701b8689` |
+
+## Public release verification
+
+The release coordinator published [v0.1.1](https://github.com/umbra-me/axio-capture/releases/tag/v0.1.1)
+as latest on September 5 after reviewing the draft. Unauthenticated
+`releases/latest/download/latest.json` returned HTTP 200, version 0.1.1, and
+exactly the reviewed feed. All 11 platform aliases point to eventual v0.1.1
+URLs and resolve to seven unique updater payloads. Each was downloaded publicly,
+matched the reviewed asset hash above, verified against the app's configured
+public key using independent minisign verification, and rejected a one-byte
+tampered payload. The public Apple Silicon and Intel DMGs also returned HTTP 200
+and matched their reviewed hashes. This establishes public feed/payload delivery
+and integrity, not a new installed-app upgrade or platform runtime acceptance.
+
+Local public downloads and seven isolated verification fixtures are retained in
+`~/.local/share/axio-capture-notarization/20260905/public-v0.1.1/`. No installed
+application was replaced. Windows/Linux installer behavior, Intel runtime,
+Wayland/mixed-DPI, remaining screen-selection/system integrations,
+cancellation/refusal and companion attachment import remain the manual cases
+listed in the handoff. The earlier successful localhost upgrade and tampered
+update rejection retain their original scope.
