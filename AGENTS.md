@@ -14,6 +14,7 @@ procedure, decisions, verification state, next steps. Keep it true.
 pnpm install                    # once; esbuild's postinstall is approved in pnpm-workspace.yaml
 pnpm app                        # tauri dev: the app against the Vite dev server
 pnpm app:build                  # tauri build: installers under src-tauri/target/release/bundle
+pnpm test                       # frontend behavior tests (Vitest/jsdom)
 pnpm build                      # frontend only: tsc --noEmit && vite build
 pnpm typecheck                  # the only step that checks TypeScript types
 cd src-tauri && cargo check     # fastest Rust loop
@@ -126,8 +127,10 @@ they are exercised:
   renders and exports a verified PNG/manifest attachment. Windows runtime,
   Wayland capture/hotkey and mixed-DPI remain unverified. Historical 0.1.0
   CI packages do not establish 0.1.1 installer or updater acceptance.
-- Never exercised: the updater's download-and-install path (needs a
-  `v0.1.1` release and an installed 0.1.0 to prove), launch at login,
+- September 5 isolated macOS fixture: genuine 0.1.0 source updated through a
+  signed localhost feed to 0.1.1, restarted and exported a verified attachment.
+  Production-feed update, refusal cases and notarization remain open.
+- Never exercised: launch at login,
   notifications, the move-to-Applications offer, the settings panel's
   interactions inside the real webview (layout and the file round-trip were
   checked from a browser and from the written JSON).

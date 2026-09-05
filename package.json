@@ -9,14 +9,17 @@
     "typecheck": "tsc --noEmit",
     "tauri": "tauri",
     "app": "tauri dev",
-    "app:build": "tauri build"
+    "app:build": "tauri build",
+    "test": "vitest run"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.9.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.4",
+    "jsdom": "^30.0.1",
     "typescript": "^5.9.0",
-    "vite": "^7.1.0"
+    "vite": "^7.1.0",
+    "vitest": "^5.0.0"
   }
 }

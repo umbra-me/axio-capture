@@ -46,8 +46,86 @@ Developer ID identity was available; the build skipped notarization. These are
 local acceptance artifacts, not a completed public macOS release. The installed
 0.1.0 application and public updater feed were left unchanged.
 
-Remaining gates: source publication and supported release packaging; actual
-0.1.0 → 0.1.1 signed download/install/restart; Windows native editor/selection;
-macOS 0.1.1 editor/selection; Wayland and mixed-DPI; companion-app import; public
+Remaining gates: supported public release packaging and production-feed updater
+acceptance; Windows native editor/selection; macOS screen selection; Wayland and
+mixed-DPI; companion-app import; public
 macOS Developer ID signing/notarisation. Local build success does not close these
 gates. No release tag or updater feed was published by this checkpoint.
+
+## Isolated macOS updater and editor acceptance
+
+Published source checkpoint: `62dbcd9fca122f20d925dd08d2e3fa7003420582`.
+A genuine `v0.1.0` source snapshot and the 0.1.1 runtime source were built with
+the same external updater key and Apple Development identity. The fixture changed
+only the product name, identifier (`me.umbra.axio-capture-acceptance-20260905`),
+and updater endpoint to a loopback HTTP feed with an explicit fixture-only
+insecure-transport override. None of those overrides entered repository source.
+Settings/save paths were isolated; launch at login was disabled and the
+move-to-Applications prompt suppressed for this disposable copy.
+
+The native 0.1.0 editor rendered and saved the bundled 128×128 PNG. Its updater
+fetched `/latest.json` and the signed 0.1.1 archive from `127.0.0.1:16907`,
+installed it and restarted. The same fixture bundle's plist then reported 0.1.1;
+`codesign --verify --deep --strict` passed. The restarted native editor exposed
+**Export attachment**, which produced a verified 128×128 PNG and manifest with
+SHA-256 `bede776b5987c1a992203540a8d8d60773bdc2d8e0b7365f2f56c6096e648a6f`.
+The archive SHA-256 was
+`79ad428439efe0499ee2bca4a0ced8eda74597d4440ea91d3986c3284eac9290`.
+
+The updater refuses a launch through macOS's `/tmp` symlink; launching the same
+fixture via canonical `/private/tmp` resolved that fixture-path restriction.
+The update dialog appeared while settings was closing, so the precise prompt and
+refusal interaction were not captured. Invalid-signature refusal is also not
+claimed by this successful-install check. The real installed application remained
+0.1.0 in `/Applications`, with its original process running. This proves an
+isolated signed installer path and new native editor export, not public
+Developer ID signing, notarization, production-feed delivery or screen permission
+acceptance.
+
+Reproducibility artifacts are under `/private/tmp/axio-capture-updater-20260905`:
+`old/`, `new/`, `installed/`, `feed/`, and `captures/`. Build/runtime/HTTP logs use
+`/tmp/axio-capture-updater-*-20260905.log`. These are temporary evidence paths,
+not durable release artifacts. The private key was read directly into the build
+process environment and was not copied into the fixture or logs.
+
+### Signature rejection checkpoint
+
+All 25 runtime/frontend/package/lock files used by the 0.1.1 fixture were compared
+byte-for-byte with published `62dbcd9fca122f20d925dd08d2e3fa7003420582` and
+matched. Fixture configuration overrides remain the only runtime configuration
+differences. A preserved old bundle now exists at
+`/private/tmp/axio-capture-updater-20260905/old-bundle/Axio Capture Acceptance.app`.
+
+An isolated Rust harness at `signature-check/` uses `minisign-verify` 0.2.5 and
+the same `PublicKey::decode`, `Signature::decode`, `verify(data, signature, true)`
+sequence as tauri-plugin-updater 2.11.0. It accepts the signed archive and rejects
+a copy with one changed byte: **The signature verification failed**. No private
+key is needed by this verifier. Its lockfile and inputs are retained beside the
+harness; output is `/tmp/axio-capture-updater-signature-20260905.log`.
+
+The native negative test was reset to 0.1.0 and fetched the feed, but the
+confirmation is hosted by macOS `com.apple.UserNotificationCenter`.
+Computer Use explicitly rejected access to that app for safety reasons; no
+alternate automation bypass was attempted. Native rejection/refusal therefore
+awaits user interaction with the isolated **Axio Capture Acceptance** dialog.
+Before that interaction, version stayed 0.1.0 and the binary SHA-256 remained
+`36aec777469de4b8969dff6d631e330eb2b8bad0a41b6fefd761694f2d3ee20e`.
+The tampered archive SHA-256 is
+`27b446420d369d480970097ce15a5c707a44ba4276d5eec626320cf9bf30b0d0`.
+`negative-before.json`, `valid-0.1.1.app.tar.gz`, the altered `feed/` archive,
+and `/tmp/axio-capture-updater-negative-20260905.log` retain that boundary.
+A passing independent verifier test does not claim a passing blocked UI flow.
+
+## Frontend behavior test gate
+
+`pnpm test` now runs 4 Vitest/jsdom tests covering the real editor HTML/module with mocked native bridges: attachment rendering and reveal, literal hostile-path text, duplicate-export suppression, failure retry, cancelled saves, and settings cancellation/error recovery.
+These exercise rendered controls and state transitions rather than source-text
+patterns or copies of Rust policy. Canvas pixel rendering and operating-system
+effects remain the responsibility of native acceptance; test native bridges are
+explicitly mocked. Test dependencies are development-only and pinned by the
+standalone component lockfile.
+
+`pnpm test` and `pnpm build` passed on macOS and the isolated Windows checkout
+(4 tests, no skipped tests). Windows logs are
+`/tmp/axio-capture-windows-frontend-20260905.log`. No native source, installed app,
+updater fixture, or public release was changed by this test-only checkpoint.
