@@ -106,15 +106,16 @@ harness; output is `/tmp/axio-capture-updater-signature-20260905.log`.
 The native negative test was reset to 0.1.0 and fetched the feed, but the
 confirmation is hosted by macOS `com.apple.UserNotificationCenter`.
 Computer Use explicitly rejected access to that app for safety reasons; no
-alternate automation bypass was attempted. Native rejection/refusal therefore
-awaits user interaction with the isolated **Axio Capture Acceptance** dialog.
+alternate automation bypass was attempted. At that checkpoint, native rejection
+awaited user interaction with the isolated **Axio Capture Acceptance** dialog;
+the user-assisted completion is recorded below.
 Before that interaction, version stayed 0.1.0 and the binary SHA-256 remained
 `36aec777469de4b8969dff6d631e330eb2b8bad0a41b6fefd761694f2d3ee20e`.
 The tampered archive SHA-256 is
 `27b446420d369d480970097ce15a5c707a44ba4276d5eec626320cf9bf30b0d0`.
 `negative-before.json`, `valid-0.1.1.app.tar.gz`, the altered `feed/` archive,
 and `/tmp/axio-capture-updater-negative-20260905.log` retain that boundary.
-A passing independent verifier test does not claim a passing blocked UI flow.
+The independent verifier alone did not establish the native UI result.
 
 ## Frontend behavior test gate
 
@@ -129,3 +130,33 @@ standalone component lockfile.
 (4 tests, no skipped tests). Windows logs are
 `/tmp/axio-capture-windows-frontend-20260905.log`. No native source, installed app,
 updater fixture, or public release was changed by this test-only checkpoint.
+
+## User-assisted native signature rejection — 16:08 AWST
+
+The user supplied a screenshot captured on 2026-09-05 at 16:08:29 AWST showing
+the isolated updater's native **Update failed** dialog, followed by **The update
+could not be installed.** and **The signature verification failed**. This is the
+previously blocked negative-fixture interaction, now observed after user input;
+no automation bypass was used.
+
+The coordinating task then read the installed isolated fixture's
+`CFBundleShortVersionString` and confirmed it remained **0.1.0**. Together with
+the existing tampered-archive identity above, this closes the native negative
+signature-verification gate: the tampered 0.1.1 update was rejected and the
+installed version did not advance. A post-attempt full binary comparison was
+not performed, so this receipt does not claim one.
+
+Screenshot evidence is retained locally as
+`Screenshot 2026-09-05 at 4.08.29 pm.png` in the user's temporary screenshot
+folder; its SHA-256 is `d0883f1756a44eff26681ff9f9a3555960e83a6d5c62e3cf5559cad0ec31cc2e`.
+The image includes unrelated desktop content and is not copied into this public
+repository. The installed fixture remains separate from the real application
+and public updater feed.
+
+This result does not establish cancellation/refusal before installation,
+production-feed delivery, Developer ID signing or notarization. Public release
+packaging, Windows editor/selection, macOS screen selection, Wayland/mixed-DPI
+and companion-app attachment import remain the separately recorded gates.
+Only this acceptance receipt changed; no runtime source, signing asset, public
+release, updater feed or installed application was changed by this documentation
+checkpoint.
