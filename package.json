@@ -1,6 +1,8 @@
 {
   "name": "axio-capture",
   "private": true,
+  "packageManager": "pnpm@11.24.0",
+  "engines": { "node": "24.19.0", "pnpm": "11.24.0" },
   "version": "0.1.1",
   "type": "module",
   "scripts": {

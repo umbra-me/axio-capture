@@ -1,0 +1,25 @@
+schema_version: 1
+component: axio/capture
+hosts: [macos, linux, windows]
+tools:
+  - {executable: node, version: "24.19.0"}
+  - {executable: pnpm, version: "11.24.0"}
+  - {executable: cargo, version: "1.98.1"}
+actions:
+  prepare:
+    - {executable: pnpm, arguments: [install, --frozen-lockfile], cwd: .}
+    - {executable: cargo, arguments: [fetch, --locked], cwd: src-tauri}
+  check:
+    - {executable: pnpm, arguments: [lint], cwd: .}
+    - {executable: pnpm, arguments: [typecheck], cwd: .}
+    - {executable: pnpm, arguments: [test], cwd: .}
+    - {executable: cargo, arguments: [fmt, --, --check], cwd: src-tauri}
+    - {executable: cargo, arguments: [clippy, --all-targets, --locked, --, -D, warnings], cwd: src-tauri}
+    - {executable: cargo, arguments: [test, --locked], cwd: src-tauri}
+  build:
+    - {executable: pnpm, arguments: [build], cwd: .}
+    - {executable: cargo, arguments: [build, --locked], cwd: src-tauri}
+  release: [{executable: cargo, arguments: [test, --locked], cwd: src-tauri}]
+manual_gates:
+  - Screen capture, shortcuts, permissions, mixed-DPI and signed updater behavior require native acceptance on each target.
+  - Signing, installation and publication require separate authorization.
