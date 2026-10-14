@@ -20,6 +20,7 @@ actions:
     - {executable: pnpm, arguments: [build], cwd: .}
     - {executable: cargo, arguments: [build, --locked], cwd: src-tauri}
   release: [{executable: cargo, arguments: [test, --locked], cwd: src-tauri}]
+fixtures: {kind: synthetic, services: []}
 manual_gates:
   - Screen capture, shortcuts, permissions, mixed-DPI and signed updater behavior require native acceptance on each target.
   - Signing, installation and publication require separate authorization.
