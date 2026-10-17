@@ -187,3 +187,10 @@ they are exercised:
   without either. Multi-monitor mixed-DPI on Linux is untested.
 
 Current integration, schema and release boundaries: [September 5 change set](docs/change-set-2026-09-05.md). Keep its completed and pending validation separate.
+
+## Umbra CLI entry point
+
+Read [DEVELOPMENT.md](DEVELOPMENT.md) for this repository's exact Umbra CLI
+source actions and routed-preview availability. Use its stable component ID
+`axio/capture`; installs remain in the owned recipe's install root. Preserve
+all existing native, provider, data, publication and production constraints.
