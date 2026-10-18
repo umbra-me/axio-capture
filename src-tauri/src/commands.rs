@@ -48,14 +48,12 @@ pub fn set_settings(
 ) -> Result<Settings, String> {
     settings.validate()?;
     let previous = state.settings();
-    if settings.shortcut != previous.shortcut {
-        if let Err(error) = hotkey::register(&app, &settings.shortcut) {
-            // Put the old one back so the app never ends up without a hotkey.
-            let _ = hotkey::register(&app, &previous.shortcut);
-            return Err(error);
-        }
-    }
-    settings::save(&app, &settings).map_err(|e| format!("{e:#}"))?;
+    settings::commit(
+        &previous,
+        &settings,
+        |shortcut| hotkey::register(&app, shortcut),
+        |next| settings::save(&app, next).map_err(|e| format!("{e:#}")),
+    )?;
     if settings.launch_at_login != previous.launch_at_login
         || settings.dock_icon != previous.dock_icon
     {
@@ -77,7 +75,7 @@ pub fn preview_file_name(state: State<'_, AppState>, pattern: String) -> Result<
             width: 1280,
             height: 720,
         },
-    );
+    )?;
     Ok(path.display().to_string())
 }
 
@@ -198,9 +196,9 @@ pub async fn overlay_confirm(
         summary.push("copied to the clipboard".to_string());
     }
     if save {
-        let path = export::new_capture_path(&settings, cropped.width(), cropped.height());
         let final_png = capture::encode_png_final(&cropped).map_err(|e| format!("{e:#}"))?;
-        export::save(&final_png, &path).map_err(|e| format!("{e:#}"))?;
+        let path = export::save_new(&final_png, &settings, cropped.width(), cropped.height())
+            .map_err(|e| format!("{e:#}"))?;
         summary.push(format!("saved to {}", path.display()));
     }
     if settings.notify {
@@ -232,7 +230,8 @@ pub struct ExportResult {
 }
 
 /// Raw PNG body from the editor's canvas; `x-axio-action` selects `copy`,
-/// `save` (default folder, timestamped name) or `save-as` (native dialog).
+/// `save` (default folder, a new name that never replaces a file) or
+/// `save-as` (native dialog, which may replace the file the user picks).
 /// Async so the dialog and the disk never block the main thread.
 #[tauri::command]
 pub async fn export_png(
@@ -274,8 +273,8 @@ pub async fn export_png(
         }
         "save" => {
             let (width, height) = export::png_dimensions(&png);
-            let path = export::new_capture_path(&settings, width, height);
-            export::save(&png, &path).map_err(|e| format!("{e:#}"))?;
+            let path =
+                export::save_new(&png, &settings, width, height).map_err(|e| format!("{e:#}"))?;
             if settings.close_on_save {
                 let _ = window.close();
             }
@@ -286,7 +285,10 @@ pub async fn export_png(
         }
         "save-as" => {
             let (width, height) = export::png_dimensions(&png);
-            let suggested = export::new_capture_path(&settings, width, height);
+            // The user picks the name, so a pattern that no longer passes
+            // validation only loses its suggestion.
+            let suggested = export::new_capture_path(&settings, width, height)
+                .unwrap_or_else(|_| export::save_dir(&settings).join("capture.png"));
             let directory = suggested
                 .parent()
                 .map(std::path::Path::to_path_buf)

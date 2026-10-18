@@ -170,6 +170,38 @@ pub fn apply_dock_icon(app: &AppHandle, mode: DockIcon) {
 #[cfg(not(target_os = "macos"))]
 pub fn apply_dock_icon(_app: &AppHandle, _mode: DockIcon) {}
 
+/// Apply a settings change in an order that can be undone. The shortcut goes
+/// first because the operating system may refuse it, then the file. When
+/// either step fails the previous shortcut is registered again, so the hotkey
+/// that works is always the one the settings file names.
+pub fn commit(
+    previous: &Settings,
+    next: &Settings,
+    mut register: impl FnMut(&str) -> Result<(), String>,
+    persist: impl FnOnce(&Settings) -> Result<(), String>,
+) -> Result<(), String> {
+    let shortcut_changed = next.shortcut != previous.shortcut;
+    if shortcut_changed {
+        if let Err(error) = register(&next.shortcut) {
+            return Err(with_rollback(error, register(&previous.shortcut)));
+        }
+    }
+    if let Err(error) = persist(next) {
+        if shortcut_changed {
+            return Err(with_rollback(error, register(&previous.shortcut)));
+        }
+        return Err(error);
+    }
+    Ok(())
+}
+
+fn with_rollback(error: String, rollback: Result<(), String>) -> String {
+    match rollback {
+        Ok(()) => error,
+        Err(again) => format!("{error}; the previous shortcut could not be restored: {again}"),
+    }
+}
+
 pub fn path(app: &AppHandle) -> Result<PathBuf> {
     let dir = app
         .path()
@@ -238,5 +270,95 @@ mod tests {
         assert!(settings.validate().is_err());
         settings.editor.width = 6;
         assert!(settings.validate().is_ok());
+    }
+
+    fn change_to(shortcut: &str) -> (Settings, Settings) {
+        let previous = Settings::default();
+        let next = Settings {
+            shortcut: shortcut.into(),
+            ..Settings::default()
+        };
+        (previous, next)
+    }
+
+    #[test]
+    fn a_failed_save_puts_the_previous_shortcut_back() {
+        let (previous, next) = change_to("Alt+F9");
+        let mut registered = Vec::new();
+        let result = commit(
+            &previous,
+            &next,
+            |shortcut| {
+                registered.push(shortcut.to_string());
+                Ok(())
+            },
+            |_| Err("disk full".to_string()),
+        );
+        assert_eq!(result.unwrap_err(), "disk full");
+        assert_eq!(registered, ["Alt+F9", crate::CAPTURE_SHORTCUT]);
+    }
+
+    #[test]
+    fn a_refused_shortcut_is_never_saved() {
+        let (previous, next) = change_to("Alt+F9");
+        let mut registered = Vec::new();
+        let mut saved = false;
+        let result = commit(
+            &previous,
+            &next,
+            |shortcut| {
+                registered.push(shortcut.to_string());
+                if shortcut == "Alt+F9" {
+                    Err("taken".to_string())
+                } else {
+                    Ok(())
+                }
+            },
+            |_| {
+                saved = true;
+                Ok(())
+            },
+        );
+        assert_eq!(result.unwrap_err(), "taken");
+        assert!(!saved);
+        assert_eq!(registered, ["Alt+F9", crate::CAPTURE_SHORTCUT]);
+    }
+
+    #[test]
+    fn a_failed_rollback_is_reported_with_the_save_error() {
+        let (previous, next) = change_to("Alt+F9");
+        let result = commit(
+            &previous,
+            &next,
+            |shortcut| {
+                if shortcut == "Alt+F9" {
+                    Ok(())
+                } else {
+                    Err("gone".to_string())
+                }
+            },
+            |_| Err("disk full".to_string()),
+        );
+        let error = result.unwrap_err();
+        assert!(error.starts_with("disk full"), "{error}");
+        assert!(error.contains("gone"), "{error}");
+    }
+
+    #[test]
+    fn an_unchanged_shortcut_is_left_alone() {
+        let (previous, next) = change_to(crate::CAPTURE_SHORTCUT);
+        let mut registered = Vec::new();
+        let result = commit(
+            &previous,
+            &next,
+            |shortcut| {
+                registered.push(shortcut.to_string());
+                Ok(())
+            },
+            |_| Err("disk full".to_string()),
+        );
+        assert!(result.is_err());
+        assert!(registered.is_empty());
+        assert!(commit(&previous, &next, |_| Ok(()), |_| Ok(())).is_ok());
     }
 }

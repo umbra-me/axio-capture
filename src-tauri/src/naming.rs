@@ -41,14 +41,22 @@ pub struct Context {
     pub height: u32,
 }
 
-/// The pattern rules the settings panel enforces before saving.
+/// The pattern rules the settings panel enforces before saving. `\` is
+/// turned into `/` first, as `sanitize` does when the name is built, so a
+/// separator cannot hide a `..` from this check on any platform. `finish`
+/// checks the expanded name again.
 pub fn validate(pattern: &str) -> Result<(), String> {
-    let trimmed = pattern.trim();
-    if trimmed.is_empty() {
+    check_relative(&pattern.trim().replace('\\', "/"))
+}
+
+/// A name with `/` separators must stay inside the save folder and end in a
+/// file name.
+fn check_relative(name: &str) -> Result<(), String> {
+    if name.trim().is_empty() {
         return Err("file name pattern is empty".into());
     }
-    let path = Path::new(trimmed);
-    if path.is_absolute() || trimmed.starts_with('/') || trimmed.starts_with('\\') {
+    let path = Path::new(name);
+    if path.is_absolute() || name.starts_with('/') {
         return Err(
             "the pattern is relative to the save folder; do not start it with a slash".into(),
         );
@@ -59,10 +67,19 @@ pub fn validate(pattern: &str) -> Result<(), String> {
             Component::RootDir | Component::Prefix(_) => {
                 return Err("the pattern must be a relative path".into());
             }
+            // Windows drops trailing dots and spaces from a name, which
+            // would turn `.. ` or `...` into `..`.
+            Component::Normal(part)
+                if part.to_str().is_some_and(|part| {
+                    part.chars().all(|c| c == '.' || c == ' ') && part.matches('.').count() >= 2
+                }) =>
+            {
+                return Err("the pattern may not contain `..`".into());
+            }
             _ => {}
         }
     }
-    let last = trimmed.rsplit(['/', '\\']).next().unwrap_or("").trim();
+    let last = name.rsplit('/').next().unwrap_or("").trim();
     if last.is_empty() {
         return Err("the pattern must end with a file name, not a folder".into());
     }
@@ -154,26 +171,54 @@ fn sanitize(expanded: &str) -> String {
         .collect()
 }
 
-/// The full path for a new capture: expanded, sanitised, `.png` appended
-/// when missing, and `%n%` resolved against what already exists.
-pub fn resolve(save_dir: &Path, pattern: &str, ctx: Context) -> PathBuf {
-    let now = Local::now();
-    let expanded = sanitize(&expand(pattern.trim(), now, ctx, &random_suffix()));
-    let with_ext = if expanded.to_ascii_lowercase().ends_with(".png") {
-        expanded
+/// An expanded pattern as a relative file name: sanitised, checked again
+/// (tokens such as `%user%` come from the environment, so the pattern check
+/// alone cannot vouch for the result) and `.png` appended when missing.
+fn finish(expanded: &str) -> Result<String, String> {
+    let name = sanitize(expanded);
+    check_relative(&name)?;
+    if name.to_ascii_lowercase().ends_with(".png") {
+        Ok(name)
     } else {
-        format!("{expanded}.png")
-    };
-    if !with_ext.contains("%n%") {
-        return save_dir.join(with_ext);
+        Ok(format!("{name}.png"))
     }
-    for n in 1..100_000u32 {
-        let candidate = save_dir.join(with_ext.replace("%n%", &n.to_string()));
-        if !candidate.exists() {
-            return candidate;
-        }
+}
+
+/// The names a new capture may take, best first, expanded once so every
+/// candidate shares one timestamp. `%n%` counts up from 1; a pattern without
+/// it is tried as written and then with `-2`, `-3`, ... before the
+/// extension, so a fixed pattern or two captures in the same second never
+/// share a file.
+pub fn candidates(
+    save_dir: &Path,
+    pattern: &str,
+    ctx: Context,
+) -> Result<impl Iterator<Item = PathBuf> + use<>, String> {
+    let name = finish(&expand(pattern.trim(), Local::now(), ctx, &random_suffix()))?;
+    let save_dir = save_dir.to_path_buf();
+    Ok((1..=MAX_CANDIDATES).map(move |n| save_dir.join(numbered(&name, n))))
+}
+
+const MAX_CANDIDATES: u32 = 100_000;
+
+fn numbered(name: &str, n: u32) -> String {
+    if name.contains("%n%") {
+        name.replace("%n%", &n.to_string())
+    } else if n == 1 {
+        name.to_string()
+    } else {
+        // `finish` guarantees an ASCII `.png` ending.
+        let (stem, extension) = name.split_at(name.len() - ".png".len());
+        format!("{stem}-{n}{extension}")
     }
-    save_dir.join(with_ext.replace("%n%", &random_suffix()))
+}
+
+/// The first candidate nothing occupies yet, for the settings preview and the
+/// Save As suggestion. It reserves nothing; `export::save_new` does that.
+pub fn resolve(save_dir: &Path, pattern: &str, ctx: Context) -> Result<PathBuf, String> {
+    candidates(save_dir, pattern, ctx)?
+        .find(|candidate| std::fs::symlink_metadata(candidate).is_err())
+        .ok_or_else(|| "every numbered name for this pattern is taken".into())
 }
 
 #[cfg(test)]
@@ -230,16 +275,89 @@ mod tests {
     }
 
     #[test]
+    fn validation_normalises_backslashes_before_looking_for_parents() {
+        // `\` becomes `/` when the name is built, so it must count as one here.
+        assert!(validate("..\\outside").is_err());
+        assert!(validate("shots\\..\\..\\outside").is_err());
+        assert!(validate("\\outside").is_err());
+        assert!(validate("%year%\\shot").is_ok());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn validation_still_rejects_a_drive_path_on_windows() {
+        // Sanitising would turn `C:` into a harmless `C_` folder; the user
+        // typed an absolute path and should be told so.
+        assert!(validate("C:\\shots\\x").is_err());
+        assert!(validate("C:/shots/x").is_err());
+    }
+
+    #[test]
+    fn validation_rejects_dot_only_components() {
+        // Windows drops trailing dots and spaces, which turns these into `..`.
+        assert!(validate("... /shot").is_err());
+        assert!(validate("shots/.. /shot").is_err());
+        assert!(validate("./shot").is_ok());
+        assert!(validate(".hidden").is_ok());
+    }
+
+    #[test]
+    fn the_expanded_name_is_checked_again() {
+        // Tokens such as `%user%` come from the environment, so the pattern
+        // check alone cannot vouch for the final name.
+        assert!(finish("..\\outside").is_err());
+        assert!(finish("/etc/shot").is_err());
+        assert!(finish("2026/..").is_err());
+        assert_eq!(finish("2026\\shot").unwrap(), "2026/shot.png");
+        assert_eq!(finish("a<b>.PNG").unwrap(), "a_b_.PNG");
+    }
+
+    #[test]
     fn resolve_appends_png_and_numbers() {
         let dir = std::env::temp_dir().join(format!("axio-naming-{}", random_suffix()));
         std::fs::create_dir_all(&dir).unwrap();
-        let first = resolve(&dir, "shot-%n%", ctx());
+        let first = resolve(&dir, "shot-%n%", ctx()).unwrap();
         assert_eq!(first, dir.join("shot-1.png"));
         std::fs::write(&first, b"x").unwrap();
-        let second = resolve(&dir, "shot-%n%", ctx());
+        let second = resolve(&dir, "shot-%n%", ctx()).unwrap();
         assert_eq!(second, dir.join("shot-2.png"));
-        let nested = resolve(&dir, "%year%/a<b>.PNG", ctx());
+        let nested = resolve(&dir, "%year%/a<b>.PNG", ctx()).unwrap();
         assert!(nested.to_string_lossy().ends_with("/a_b_.PNG"));
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn resolve_never_offers_a_taken_name_for_a_fixed_pattern() {
+        let dir = std::env::temp_dir().join(format!("axio-naming-{}", random_suffix()));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("shot.png"), b"x").unwrap();
+        assert_eq!(
+            resolve(&dir, "shot", ctx()).unwrap(),
+            dir.join("shot-2.png")
+        );
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn candidates_number_before_the_extension_or_at_n() {
+        let dir = Path::new("/captures");
+        let fixed: Vec<_> = candidates(dir, "shot.PNG", ctx())
+            .unwrap()
+            .take(3)
+            .collect();
+        assert_eq!(
+            fixed,
+            [
+                dir.join("shot.PNG"),
+                dir.join("shot-2.PNG"),
+                dir.join("shot-3.PNG")
+            ]
+        );
+        let numbered: Vec<_> = candidates(dir, "%n%/shot", ctx())
+            .unwrap()
+            .take(2)
+            .collect();
+        assert_eq!(numbered, [dir.join("1/shot.png"), dir.join("2/shot.png")]);
+        assert!(candidates(dir, "..\\outside", ctx()).is_err());
     }
 }

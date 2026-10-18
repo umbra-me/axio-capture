@@ -64,13 +64,18 @@ APPLE_SIGNING_IDENTITY="Apple Development: …" \
   it is `async` so the save dialog and disk writes never run on the main
   thread.
 - `export.rs` owns the clipboard (arboard; on Linux a thread keeps the offer
-  alive) and the captures folder, `~/Pictures/Axio Capture`.
+  alive) and the captures folder, `~/Pictures/Axio Capture`. Every automatic
+  save (the editor's Save, `after_capture` save) goes through `save_new`,
+  which creates each candidate name with `create_new` and moves on when it
+  exists, so it never truncates a file or follows a link. Only Save As, whose
+  dialog asks first, may replace a file (`save`).
 - `cli.rs` parses `--capture` and `--open <path>` for both the first launch
   and forwarded second launches.
 - `settings.rs` is the one JSON settings file (`app_config_dir()/settings.json`)
   with `#[serde(default)]` everywhere so older files keep loading; `validate`
-  is the only gate, and `set_settings` re-registers the hotkey through
-  `hotkey.rs` before persisting, restoring the previous one on failure. The
+  is the only gate, and `set_settings` goes through `settings::commit`: the
+  hotkey is re-registered through `hotkey.rs` before persisting, and the
+  previous one is restored when either the registration or the write fails. The
   `after_capture` setting is honoured in `overlay_confirm`; `close_on_*` in
   `export_png`, which hides the window from Rust so the page needs no window
   permission. The editor's last tool, colour and width are saved from the page
@@ -88,7 +93,11 @@ APPLE_SIGNING_IDENTITY="Apple Development: …" \
   additionally declares `LSUIElement`, so LaunchServices itself starts the
   app as a menu-bar app; the runtime policy then only ever adds the icon.
 - `naming.rs` expands file-name patterns (`%year%/%month%/shot-%time%`). It
-  is pure except `resolve`, which touches the folder to satisfy `%n%`. Add a
+  is pure except `resolve`, which looks at the folder for the first free
+  candidate (a preview; `export::save_new` is what claims a name). Patterns
+  and expanded names are checked after `\` has become `/`, so neither can
+  reach outside the save folder. `candidates` numbers at `%n%`, or appends
+  `-2`, `-3`, ... before the extension when the pattern has no `%n%`. Add a
   token in `TOKENS` **and** `token()`; the panel lists `TOKENS` and the tests
   pin the format of every existing one. Unknown tokens are kept verbatim by
   design, so a typo shows up in the file name instead of vanishing.
@@ -140,9 +149,10 @@ they are exercised:
   notifications, the move-to-Applications offer, the settings panel's
   interactions inside the real webview (layout and the file round-trip were
   checked from a browser and from the written JSON).
-- Automated: 12 Rust tests (selection mapping, crop, settings defaults and
-  validation, file-name patterns and `%n%`), clippy, fmt, `tsc`, and the
-  release workflow on a `v*` tag.
+- Automated: 27 Rust tests (selection mapping, crop, settings defaults,
+  validation and the hotkey rollback, file-name patterns, `%n%`, path
+  containment, and exclusive auto-save names including concurrent saves and
+  symbolic links), clippy, fmt, `tsc`, and the release workflow on a `v*` tag.
 
 ## Gotchas
 

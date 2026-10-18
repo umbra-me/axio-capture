@@ -102,8 +102,13 @@ Read `AGENTS.md` for the module map. The shape:
   never base64; export takes a raw PNG body with the action in a header.
 - **Settings** (`settings.rs`): one JSON file, `#[serde(default)]` on every
   field. `apply_system` pushes the login item and the Dock policy.
+  `commit` registers a new hotkey before writing the file and puts the old
+  one back if either step fails.
 - **Naming** (`naming.rs`): `%year%/%month%/shot-%time%` patterns; unknown
-  tokens survive verbatim so typos are visible.
+  tokens survive verbatim so typos are visible. Names are checked after `\`
+  becomes `/`, both as typed and once expanded. Automatic saves claim a name
+  with `export::save_new` (exclusive create, `-2`, `-3`, ... or the next
+  `%n%`), so they never replace a file; Save As still may.
 - **Updater** (`updater.rs`), **permission** (`permission.rs`), **install**
   (`install.rs`), **hotkey**, **tray**, **cli**: each a small file.
 
